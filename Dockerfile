@@ -4,7 +4,9 @@ FROM node:20-bookworm
 RUN apt-get update && apt-get install -y \
     postgresql postgresql-contrib \
     supervisor \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /etc/postgresql/15/main/postgresql.conf \
+    && echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/15/main/pg_hba.conf
 
 # Set up project directory
 WORKDIR /app

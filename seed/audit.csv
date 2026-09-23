@@ -1,0 +1,33 @@
+AuditID,LeadID,Action,Actor,Comment,Timestamp
+audit-01,lead-01,Lead Created,System Webhook,Payload ingested and validated,2026-09-20T10:00:00Z
+audit-02,lead-02,Lead Created,System Webhook,Payload ingested and validated,2026-09-20T11:15:00Z
+audit-03,lead-03,Lead Created,System Webhook,Payload ingested and validated,2026-09-20T14:30:00Z
+audit-04,lead-04,Lead Created,System Webhook,Payload ingested and validated,2026-09-21T09:00:00Z
+audit-05,lead-05,Lead Created,System Webhook,Payload ingested and validated,2026-09-21T10:45:00Z
+audit-06,lead-06,Lead Created,System Webhook,Payload ingested and validated,2026-09-21T13:20:00Z
+audit-07,lead-07,Lead Created,System Webhook,Payload ingested and validated,2026-09-21T15:10:00Z
+audit-08,lead-08,Lead Created,System Webhook,Payload ingested and validated,2026-09-22T08:30:00Z
+audit-09,lead-09,Lead Created,System Webhook,Payload ingested and validated,2026-09-22T09:45:00Z
+audit-10,lead-10,Lead Created,System Webhook,Payload ingested and validated,2026-09-22T11:00:00Z
+audit-11,lead-11,Lead Created,System Webhook,Payload ingested and validated,2026-09-22T12:15:00Z
+audit-12,lead-12,Lead Created,System Webhook,Payload ingested and validated,2026-09-22T14:50:00Z
+audit-13,lead-13,Lead Created,System Webhook,Payload ingested and validated,2026-09-23T09:20:00Z
+audit-14,lead-14,Lead Created,System Webhook,Payload ingested and validated,2026-09-23T10:35:00Z
+audit-15,lead-15,Lead Created,System Webhook,Payload ingested and validated,2026-09-23T11:40:00Z
+audit-16,lead-16,Lead Created,System Webhook,Payload ingested and validated,2026-09-23T14:10:00Z
+audit-17,lead-17,Lead Created,System Webhook,Payload ingested and validated,2026-09-23T15:25:00Z
+audit-18,lead-18,Lead Created,System Webhook,Payload ingested and validated,2026-09-24T09:05:00Z
+audit-19,lead-19,Lead Created,System Webhook,Payload ingested and validated,2026-09-24T10:15:00Z
+audit-20,lead-20,Lead Created,System Webhook,Payload ingested and validated,2026-09-24T11:30:00Z
+audit-21,lead-01,Status Changed,Agent Michael,Status updated: New -> Contacted,2026-09-20T10:45:00Z
+audit-22,lead-01,Note Added,Agent Michael,Left a voicemail and sent follow-up email,2026-09-20T10:46:00Z
+audit-23,lead-02,Status Changed,Agent Michael,Status updated: New -> Dead,2026-09-20T11:30:00Z
+audit-24,lead-02,Note Added,Agent Michael,Prospect was looking for a different city,2026-09-20T11:31:00Z
+audit-25,lead-03,Lead Updated,Agent Michael,Corrected spelling of company name in payload,2026-09-20T15:00:00Z
+audit-26,lead-03,Status Changed,Agent Michael,Status updated: New -> Contacted,2026-09-20T15:10:00Z
+audit-27,lead-03,Status Changed,Agent Michael,Status updated: Contacted -> Qualified,2026-09-21T09:30:00Z
+audit-28,lead-04,Status Changed,Agent Michael,Status updated: New -> Contacted,2026-09-21T09:45:00Z
+audit-29,lead-06,Status Changed,Agent Michael,Status updated: New -> Converted,2026-09-21T14:00:00Z
+audit-30,lead-06,Note Added,Agent Michael,Customer purchased a day pass online,2026-09-21T14:01:00Z
+audit-31,lead-11,Status Changed,Agent Michael,Status updated: New -> Contacted,2026-09-22T13:00:00Z
+audit-32,lead-11,Lead Updated,Agent Michael,Updated space requirement to 1500 sq ft,2026-09-22T13:05:00Z

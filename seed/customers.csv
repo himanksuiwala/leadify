@@ -1,0 +1,16 @@
+CustomerID,FirstName,LastName,Email,Phone
+cust-01,Alice,Smith,alice.smith@example.com,555-0101
+cust-02,Bob,Johnson,bob.j@example.com,555-0102
+cust-03,Charlie,Davis,cdavis@example.com,555-0103
+cust-04,Diana,Prince,diana.p@example.com,555-0104
+cust-05,Evan,Wright,evanw@example.com,555-0105
+cust-06,Fiona,Gallagher,fiona.g@example.com,555-0106
+cust-07,George,Miller,gmiller@example.com,555-0107
+cust-08,Hannah,Abbott,hannah.a@example.com,555-0108
+cust-09,Ian,Malcolm,ian.m@example.com,555-0109
+cust-10,Julia,Roberts,jroberts@example.com,555-0110
+cust-11,Kevin,Hart,khart@example.com,555-0111
+cust-12,Laura,Dern,laura.d@example.com,555-0112
+cust-13,Michael,Scott,mscott@example.com,555-0113
+cust-14,Nina,Simone,nina.s@example.com,555-0114
+cust-15,Oscar,Isaac,oisaac@example.com,555-0115

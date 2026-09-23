@@ -1,0 +1,30 @@
+erDiagram
+    CUSTOMER ||--o{ LEAD : "has"
+    LEAD ||--o{ AUDIT : "tracks history in"
+
+    CUSTOMER {
+        UUID CustomerID PK
+        String FirstName
+        String LastName
+        String Email
+        String Phone
+    }
+
+    LEAD {
+        UUID LeadID PK
+        UUID CustomerID FK
+        String Source
+        String Topic
+        String Message
+        String Status
+        DateTime Timestamp
+    }
+
+    AUDIT {
+        UUID AuditID PK
+        UUID LeadID FK
+        String Action
+        String Actor
+        String Comment
+        DateTime Timestamp
+    }

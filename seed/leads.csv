@@ -1,0 +1,21 @@
+LeadID,CustomerID,Source,Topic,Message,Status,Timestamp
+lead-01,cust-01,Meta Ads,3 BHK Villa,"Looking for a villa with a pool",New,2026-09-20T10:00:00Z
+lead-02,cust-02,Website Form,2 BHK Apartment,"Interested in immediate move-in",New,2026-09-20T11:15:00Z
+lead-03,cust-03,LinkedIn,Enterprise Office,"Need space for 50 employees",New,2026-09-20T14:30:00Z
+lead-04,cust-04,Meta Ads,Commercial Shop,"Downtown location preferred",New,2026-09-21T09:00:00Z
+lead-05,cust-05,Zillow,4 BHK Penthouse,"Is the price negotiable?",New,2026-09-21T10:45:00Z
+lead-06,cust-06,Website Form,Hot Desk,"Need a day pass for next week",New,2026-09-21T13:20:00Z
+lead-07,cust-07,Meta Ads,1 BHK Studio,"Looking for a student rental",New,2026-09-21T15:10:00Z
+lead-08,cust-08,LinkedIn,Meeting Room,"Need a conference room for full day",New,2026-09-22T08:30:00Z
+lead-09,cust-09,Website Form,Luxury Villa,"Please send brochure and floor plans",New,2026-09-22T09:45:00Z
+lead-10,cust-10,Meta Ads,2 BHK Apartment,"When can I schedule a viewing?",New,2026-09-22T11:00:00Z
+lead-11,cust-11,Zillow,Commercial Office,"Looking for 1000 sq ft space",New,2026-09-22T12:15:00Z
+lead-12,cust-12,Website Form,Dedicated Desk,"Month-to-month lease options?",New,2026-09-22T14:50:00Z
+lead-13,cust-13,Meta Ads,3 BHK Apartment,"Are pets allowed?",New,2026-09-23T09:20:00Z
+lead-14,cust-14,LinkedIn,Enterprise Office,"Custom buildout for tech startup",New,2026-09-23T10:35:00Z
+lead-15,cust-15,Website Form,Virtual Office,"Need a registered business address",New,2026-09-23T11:40:00Z
+lead-16,cust-01,Website Form,2 BHK Apartment,"Also considering smaller units",New,2026-09-23T14:10:00Z
+lead-17,cust-02,Meta Ads,3 BHK Apartment,"Willing to upgrade if parking is included",New,2026-09-23T15:25:00Z
+lead-18,cust-03,Website Form,Hot Desk,"Looking for something flexible while office is built",New,2026-09-24T09:05:00Z
+lead-19,cust-04,LinkedIn,Retail Space,"Exploring alternative locations",New,2026-09-24T10:15:00Z
+lead-20,cust-05,Meta Ads,3 BHK Villa,"Following up on my previous inquiry",New,2026-09-24T11:30:00Z

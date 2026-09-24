@@ -36,19 +36,52 @@ export const createLeadWithAudit = async (
   }
 };
 
-export const getLeads = async (page: number, limit: number) => {
-  console.error("DEBUG getLeads:", { page, limit });
-
+export const getLeads = async (page: number, limit: number, status?: string, sort?: string) => {
   const offset = (page - 1) * limit;
+  const params: any[] = [];
+  let whereClause = '';
+  
+  if (status) {
+    whereClause = `WHERE l."Status" = $1`;
+    params.push(status);
+  }
+
+  let orderByClause = 'ORDER BY l."Timestamp" DESC'; // default date_desc
+  if (sort === 'date_asc') {
+    orderByClause = 'ORDER BY l."Timestamp" ASC';
+  } else if (sort === 'name_asc') {
+    orderByClause = 'ORDER BY c."FirstName" ASC, c."LastName" ASC';
+  } else if (sort === 'status') {
+    orderByClause = `
+      ORDER BY CASE l."Status"
+        WHEN 'New' THEN 1
+        WHEN 'Contacted' THEN 2
+        WHEN 'Qualified' THEN 3
+        WHEN 'Lost' THEN 4
+        ELSE 5
+      END ASC, l."Timestamp" DESC
+    `;
+  }
+
+  params.push(limit);
+  const limitIdx = params.length;
+  params.push(offset);
+  const offsetIdx = params.length;
+
   const result = await query(`
     SELECT l.*, c."FirstName", c."LastName", c."Email"
     FROM "Lead" l
     JOIN "Customer" c ON l."CustomerID" = c."CustomerID"
-    ORDER BY l."Timestamp" DESC
-    LIMIT $1 OFFSET $2
-  `, [limit, offset]);
+    ${whereClause}
+    ${orderByClause}
+    LIMIT $${limitIdx} OFFSET $${offsetIdx}
+  `, params);
 
-  const countResult = await query('SELECT COUNT(*) FROM "Lead"');
+  const countQuery = status 
+    ? { text: 'SELECT COUNT(*) FROM "Lead" l WHERE l."Status" = $1', values: [status] }
+    : { text: 'SELECT COUNT(*) FROM "Lead" l', values: [] };
+
+  const countResult = await query(countQuery.text, countQuery.values);
   return {
     data: result.rows,
     total: parseInt(countResult.rows[0].count, 10)

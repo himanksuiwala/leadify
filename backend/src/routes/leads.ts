@@ -10,9 +10,9 @@ export const leadsRouter = Router();
 // GET /leads
 leadsRouter.get('/', async (req, res, next) => {
   try {
-    const { page, limit } = await PaginationQuerySchema.parseAsync(req.query);
+    const { page, limit, status, sort } = await PaginationQuerySchema.parseAsync(req.query);
 
-    const { data, total } = await getLeads(page, limit);
+    const { data, total } = await getLeads(page, limit, status, sort);
     
     sendSuccess(res, data, {
       total,

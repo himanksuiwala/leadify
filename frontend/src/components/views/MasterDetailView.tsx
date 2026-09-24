@@ -18,6 +18,7 @@ export function MasterDetailView() {
   // Filter & Sort State
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<string>("date_desc");
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   // Fetch logic
   const fetchLeads = async (
@@ -58,7 +59,7 @@ export function MasterDetailView() {
     const controller = new AbortController();
     fetchLeads(1, statusFilter, sortOrder, controller.signal);
     return () => controller.abort();
-  }, [statusFilter, sortOrder]);
+  }, [statusFilter, sortOrder, refreshCounter]);
 
   // Load more on page change (if page > 1)
   useEffect(() => {
@@ -96,6 +97,11 @@ export function MasterDetailView() {
               setStatusFilter(status);
               setLeads([]); // Clear instantly to show loader
               setPage(1);
+            }}
+            onRefresh={() => {
+              setLeads([]);
+              setPage(1);
+              setRefreshCounter(prev => prev + 1);
             }}
             sortOrder={sortOrder}
             onSortChange={(sort) => {

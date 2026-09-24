@@ -1,6 +1,7 @@
 import { TimeDisplay } from "@/components/ui/TimeDisplay";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface Lead {
@@ -24,6 +25,7 @@ interface LeadListProps {
   onStatusChange?: (status: string | null) => void;
   sortOrder?: string;
   onSortChange?: (sort: string) => void;
+  onRefresh?: () => void;
 }
 
 const statuses = ["All", "New", "Qualified", "Converted", "Dead"];
@@ -36,7 +38,8 @@ export function LeadList({
   statusFilter,
   onStatusChange,
   sortOrder,
-  onSortChange
+  onSortChange,
+  onRefresh
 }: LeadListProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,9 +57,13 @@ export function LeadList({
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">Leads</h2>
           
-          <Select value={sortOrder} onValueChange={onSortChange}>
-            <SelectTrigger className="w-[140px] h-8 text-xs">
-              <SelectValue placeholder="Sort by" />
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={onRefresh}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Select value={sortOrder} onValueChange={onSortChange}>
+              <SelectTrigger className="w-[140px] h-8 text-xs">
+                <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="date_desc">Newest First</SelectItem>
@@ -65,6 +72,7 @@ export function LeadList({
               <SelectItem value="status">Status Priority</SelectItem>
             </SelectContent>
           </Select>
+          </div>
         </div>
         
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">

@@ -1,5 +1,6 @@
-import { Search } from "lucide-react";
+import { Search, ArrowUpRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function AppNavbar() {
   return (
@@ -19,8 +20,15 @@ export function AppNavbar() {
         </div>
       </div>
       
-      {/* Right Spacer */}
-      <div className="flex-1" />
+      {/* Right Actions */}
+      <div className="flex-1 flex justify-end">
+        <Button variant="outline" size="sm" asChild>
+          <a href="/mock-webhook" target="_blank" rel="noreferrer">
+            Mock Webhook
+            <ArrowUpRight className="ml-2 h-4 w-4" />
+          </a>
+        </Button>
+      </div>
     </header>
   );
 }

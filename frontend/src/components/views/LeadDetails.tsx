@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Phone, Mail, MessageSquare, Loader2, ArrowLeft, ChevronDown } from "lucide-react";
+import { Phone, Mail, MessageSquare, Loader2, ArrowLeft, ChevronDown, Edit2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TimeDisplay } from "@/components/ui/TimeDisplay";
+import { EditLeadModal } from "./EditLeadModal";
 
 interface AuditEvent {
   AuditID: string;
@@ -58,13 +59,14 @@ export function LeadDetails({
   selectedItemId: string | null;
   onBack?: () => void;
   isMobileView?: boolean;
-  onLeadUpdated?: (id: string, newStatus: string) => void;
+  onLeadUpdated?: (id: string, updates: any) => void;
 }) {
   const [lead, setLead] = useState<DetailedLead | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshCounter, setRefreshCounter] = useState(0);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (!selectedItemId) {
@@ -113,7 +115,7 @@ export function LeadDetails({
       });
       if (!response.ok) throw new Error("Failed to update status");
       
-      onLeadUpdated?.(lead.LeadID, newStatus);
+      onLeadUpdated?.(lead.LeadID, { Status: newStatus });
       setRefreshCounter(prev => prev + 1);
     } catch (err: any) {
       setError(err.message);
@@ -207,6 +209,10 @@ export function LeadDetails({
             </div>
             <p className="text-lg font-medium text-slate-700">{lead.Topic}</p>
           </div>
+          <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)} className="gap-2">
+            <Edit2 className="h-4 w-4" />
+            Edit
+          </Button>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between mt-2">
@@ -239,6 +245,19 @@ export function LeadDetails({
           </div>
         </div>
       </div>
+
+      <EditLeadModal
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        lead={lead}
+        onSuccess={(updatedFields) => {
+          setRefreshCounter(prev => prev + 1);
+          onLeadUpdated?.(lead.LeadID, {
+            FirstName: updatedFields.firstName,
+            LastName: updatedFields.lastName
+          });
+        }}
+      />
 
       {/* Details Content - Grid Layout */}
       <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[60%_40%] overflow-y-auto lg:overflow-hidden">

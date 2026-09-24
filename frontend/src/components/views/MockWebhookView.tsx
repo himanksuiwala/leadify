@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/config";
 
 export function MockWebhookView() {
   const [formData, setFormData] = useState({
@@ -33,7 +34,7 @@ export function MockWebhookView() {
         source: "Meta Ads",
       };
 
-      const response = await fetch("http://localhost:3000/webhook/meta-lead", {
+      const response = await fetch(`${API_BASE_URL}/webhook/meta-lead`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

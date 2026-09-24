@@ -4,6 +4,7 @@ import { LeadList } from "./LeadList";
 import type { Lead } from "./LeadList";
 import { LeadDetails } from "./LeadDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_BASE_URL } from "@/lib/config";
 
 export function MasterDetailView() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -38,7 +39,7 @@ export function MasterDetailView() {
       });
       if (currentStatus) queryParams.append("status", currentStatus);
 
-      const response = await fetch(`http://localhost:3000/leads?${queryParams.toString()}`, { signal });
+      const response = await fetch(`${API_BASE_URL}/leads?${queryParams.toString()}`, { signal });
       if (!response.ok) throw new Error("Failed to fetch leads");
       
       const json = await response.json();

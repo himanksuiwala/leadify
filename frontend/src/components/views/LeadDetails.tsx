@@ -11,6 +11,7 @@ import {
 import { TimeDisplay } from "@/components/ui/TimeDisplay";
 import { EditLeadModal } from "./EditLeadModal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { API_BASE_URL } from "@/lib/config";
 
 interface AuditEvent {
   AuditID: string;
@@ -86,7 +87,7 @@ export function LeadDetails({
       }
       setError(null);
       try {
-        const response = await fetch(`http://localhost:3000/leads/${selectedItemId}`, {
+        const response = await fetch(`${API_BASE_URL}/leads/${selectedItemId}`, {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error("Failed to fetch lead details");
@@ -112,7 +113,7 @@ export function LeadDetails({
     setIsUpdating(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:3000/leads/${lead.LeadID}/status`, {
+      const response = await fetch(`${API_BASE_URL}/leads/${lead.LeadID}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

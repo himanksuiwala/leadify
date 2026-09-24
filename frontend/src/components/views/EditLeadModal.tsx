@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/lib/config";
 
 interface EditLeadModalProps {
   isOpen: boolean;
@@ -64,7 +65,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`http://localhost:3000/leads/${lead.LeadID}`, {
+      const response = await fetch(`${API_BASE_URL}/leads/${lead.LeadID}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

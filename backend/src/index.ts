@@ -49,7 +49,9 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   if (err instanceof ZodError) {
     return res.status(400).json({ error: 'Validation failed', details: err.issues });
   }
-  console.log('GLOBAL ERROR', err);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('GLOBAL ERROR', err);
+  }
   res.status(500).json({ error: 'Internal Server Error' });
 });
 

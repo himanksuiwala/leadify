@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
+import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -128,7 +129,9 @@ export function LeadList({
         ))}
         
         {isLoading && (
-          <div className="text-center text-slate-500 py-4">Loading...</div>
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          </div>
         )}
       </div>
     </div>

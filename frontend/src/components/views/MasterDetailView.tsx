@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { UIEvent } from "react";
 import { LeadList } from "./LeadList";
 import type { Lead } from "./LeadList";
-import { LeadDetailsPlaceholder } from "./LeadDetailsPlaceholder";
+import { LeadDetails } from "./LeadDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function MasterDetailView() {
@@ -94,11 +94,13 @@ export function MasterDetailView() {
             statusFilter={statusFilter}
             onStatusChange={(status) => {
               setStatusFilter(status);
+              setLeads([]); // Clear instantly to show loader
               setPage(1);
             }}
             sortOrder={sortOrder}
             onSortChange={(sort) => {
               setSortOrder(sort);
+              setLeads([]); // Clear instantly to show loader
               setPage(1);
             }}
           />
@@ -108,7 +110,7 @@ export function MasterDetailView() {
       {/* Detail View */}
       {showDetails && (
         <div className={`flex flex-col bg-slate-50 h-full ${isMobile ? "w-full" : "w-2/3 flex-1"}`}>
-          <LeadDetailsPlaceholder 
+          <LeadDetails 
             selectedItemId={selectedItemId} 
             onBack={() => setSelectedItemId(null)}
             isMobileView={isMobile}

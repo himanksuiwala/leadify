@@ -45,3 +45,7 @@ lerna-debug.log*
 
 # Vite
 vite.config.ts.timestamp-*
+prompts.md
+.specify
+.agents
+specs

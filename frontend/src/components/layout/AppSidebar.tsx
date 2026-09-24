@@ -22,7 +22,26 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { useEffect, useState } from "react";
+
 export function AppSidebar() {
+  const [user, setUser] = useState<{FirstName: string, LastName: string, Email: string} | null>(null);
+
+  useEffect(() => {
+    fetch('http://localhost:3000/api/users/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          setUser(data.data);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const fullName = user ? `${user.FirstName} ${user.LastName}` : 'Jane Doe';
+  const initials = user ? `${user.FirstName[0]}${user.LastName[0]}` : 'JD';
+  const email = user ? user.Email : 'jane@acme.com';
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="flex flex-row items-center justify-between p-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
@@ -94,12 +113,12 @@ export function AppSidebar() {
         <div className="flex items-center justify-between overflow-hidden group-data-[collapsible=icon]:justify-center">
           <div className="flex items-center gap-3 overflow-hidden">
             <Avatar className="h-8 w-8 shrink-0">
-              <AvatarImage src="" alt="Jane Doe" />
-              <AvatarFallback className="bg-slate-900 text-slate-50 text-xs">JD</AvatarFallback>
+              <AvatarImage src="" alt={fullName} />
+              <AvatarFallback className="bg-slate-900 text-slate-50 text-xs">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-col truncate group-data-[collapsible=icon]:hidden flex">
-              <span className="font-semibold text-sm text-slate-900">Jane Doe</span>
-              <span className="text-xs text-slate-500 truncate">jane@acme.com</span>
+              <span className="font-semibold text-sm text-slate-900">{fullName}</span>
+              <span className="text-xs text-slate-500 truncate">{email}</span>
             </div>
           </div>
           <button className="text-slate-400 hover:text-slate-600 transition-colors shrink-0 group-data-[collapsible=icon]:hidden">

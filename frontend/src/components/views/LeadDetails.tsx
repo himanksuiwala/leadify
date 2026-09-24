@@ -10,12 +10,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TimeDisplay } from "@/components/ui/TimeDisplay";
 import { EditLeadModal } from "./EditLeadModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AuditEvent {
   AuditID: string;
   LeadID: string;
   Action: string;
-  Actor: string;
+  User?: {
+    FirstName: string;
+    LastName: string;
+  } | null;
   Comment: string;
   Timestamp: string;
 }
@@ -171,6 +175,7 @@ export function LeadDetails({
   const allowedTransitions = getAllowedTransitions(lead.Status);
 
   return (
+    <TooltipProvider>
     <div className="flex-1 flex flex-col overflow-hidden bg-white">
       {/* Contact Card Header */}
       <div className="shrink-0 z-10 bg-white border-b border-slate-200 shadow-sm p-6 flex flex-col gap-4">
@@ -207,7 +212,14 @@ export function LeadDetails({
                 <Badge className={getStatusColor(lead.Status)}>{lead.Status}</Badge>
               )}
             </div>
-            <p className="text-lg font-medium text-slate-700">{lead.Topic}</p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-lg font-medium text-slate-700 truncate max-w-[300px] sm:max-w-md cursor-default">{lead.Topic}</p>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[400px]">
+                <p className="break-words">{lead.Topic}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)} className="gap-2">
             <Edit2 className="h-4 w-4" />
@@ -268,9 +280,16 @@ export function LeadDetails({
           <div className="p-6 pb-6 flex-1">
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-5">
               <h3 className="text-sm font-semibold text-slate-900 mb-2">Message</h3>
-              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-                {lead.Message}
-              </p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="text-slate-700 whitespace-pre-wrap leading-relaxed line-clamp-3 cursor-default">
+                    {lead.Message}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[500px]">
+                  <p className="whitespace-pre-wrap break-words">{lead.Message}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
@@ -302,7 +321,7 @@ export function LeadDetails({
                   <div key={audit.AuditID} className="relative">
                     <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-white bg-slate-400" />
                     <div className="text-sm text-slate-900 font-medium">
-                      {audit.Action} <span className="text-slate-500 font-normal">by {audit.Actor || 'System'}</span>
+                      {audit.Action} <span className="text-slate-500 font-normal">by {audit.User ? `${audit.User.FirstName} ${audit.User.LastName}` : 'System'}</span>
                     </div>
                     <div className="text-xs text-slate-500 mt-1">
                       <TimeDisplay timestamp={audit.Timestamp} />
@@ -320,5 +339,6 @@ export function LeadDetails({
         </div>
       </div>
     </div>
+    </TooltipProvider>
   );
 }

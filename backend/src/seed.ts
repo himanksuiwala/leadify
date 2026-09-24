@@ -16,6 +16,7 @@ async function seed() {
       DROP TABLE IF EXISTS "Audit" CASCADE;
       DROP TABLE IF EXISTS "Lead" CASCADE;
       DROP TABLE IF EXISTS "Customer" CASCADE;
+      DROP TABLE IF EXISTS "User" CASCADE;
       DROP TYPE IF EXISTS lead_status CASCADE;
       DROP TYPE IF EXISTS audit_action CASCADE;
     `);
@@ -25,20 +26,28 @@ async function seed() {
       CREATE TYPE lead_status AS ENUM ('New', 'Qualified', 'Converted', 'Dead');
       CREATE TYPE audit_action AS ENUM ('Created', 'Updated', 'Status Changed');
 
+      CREATE TABLE "User" (
+        "UserID" UUID PRIMARY KEY,
+        "FirstName" VARCHAR(30) NOT NULL,
+        "LastName" VARCHAR(30) NOT NULL,
+        "Email" VARCHAR(100) UNIQUE NOT NULL
+      );
+
       CREATE TABLE "Customer" (
         "CustomerID" UUID PRIMARY KEY,
-        "FirstName" TEXT NOT NULL,
-        "LastName" TEXT NOT NULL,
-        "Email" TEXT UNIQUE NOT NULL,
-        "Phone" TEXT
+        "FirstName" VARCHAR(30) NOT NULL,
+        "LastName" VARCHAR(30) NOT NULL,
+        "Email" VARCHAR(100) UNIQUE NOT NULL,
+        "Phone" VARCHAR(15)
       );
 
       CREATE TABLE "Lead" (
         "LeadID" UUID PRIMARY KEY,
         "CustomerID" UUID NOT NULL REFERENCES "Customer"("CustomerID") ON DELETE CASCADE,
-        "Source" TEXT,
-        "Topic" TEXT,
-        "Message" TEXT,
+        "AssignedTo" UUID REFERENCES "User"("UserID") ON DELETE SET NULL,
+        "Source" VARCHAR(30),
+        "Topic" VARCHAR(50),
+        "Message" VARCHAR(500),
         "Status" lead_status DEFAULT 'New',
         "Timestamp" TIMESTAMP
       );
@@ -47,7 +56,7 @@ async function seed() {
         "AuditID" UUID PRIMARY KEY,
         "LeadID" UUID NOT NULL REFERENCES "Lead"("LeadID") ON DELETE CASCADE,
         "Action" audit_action,
-        "Actor" TEXT,
+        "ActorID" UUID REFERENCES "User"("UserID") ON DELETE SET NULL,
         "Comment" TEXT,
         "Timestamp" TIMESTAMP
       );
@@ -63,11 +72,32 @@ async function seed() {
     const leadsData: any[] = parse(leadsCsv, { columns: true, skip_empty_lines: true });
     const auditData: any[] = parse(auditCsv, { columns: true, skip_empty_lines: true });
 
-    // 3. Mapping Maps for old ID -> new UUID
+    // 3. Insert Internal Users
+    console.log('Inserting internal users...');
+    const amanUserId = crypto.randomUUID();
+    const systemUserId = crypto.randomUUID();
+
+    await query(
+      `INSERT INTO "User" ("UserID", "FirstName", "LastName", "Email") VALUES ($1, $2, $3, $4)`,
+      [amanUserId, 'Aman', 'Rawat', 'aman@example.com']
+    );
+    await query(
+      `INSERT INTO "User" ("UserID", "FirstName", "LastName", "Email") VALUES ($1, $2, $3, $4)`,
+      [systemUserId, 'System', 'Webhook', 'system@webhook.local']
+    );
+    
+    // Create maps for actor IDs
+    const actorMap = new Map<string, string>([
+      ['Sales Agent', amanUserId],
+      ['System', systemUserId],
+      ['Meta Webhook', systemUserId]
+    ]);
+
+    // 4. Mapping Maps for old ID -> new UUID
     const customerIdMap = new Map<string, string>();
     const leadIdMap = new Map<string, string>();
 
-    // 4. Insert Customers
+    // 5. Insert Customers
     console.log('Inserting customers...');
     for (const row of customersData) {
       const newId = crypto.randomUUID();
@@ -80,7 +110,7 @@ async function seed() {
     }
     console.log(`Inserted ${customersData.length} customers.`);
 
-    // 5. Insert Leads
+    // 6. Insert Leads
     console.log('Inserting leads...');
     for (const row of leadsData) {
       const newId = crypto.randomUUID();
@@ -90,13 +120,13 @@ async function seed() {
       if (!newCustomerId) throw new Error(`Customer ID ${row.CustomerID} not found in map.`);
 
       await query(
-        `INSERT INTO "Lead" ("LeadID", "CustomerID", "Source", "Topic", "Message", "Status", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [newId, newCustomerId, row.Source, row.Topic, row.Message, row.Status, row.Timestamp]
+        `INSERT INTO "Lead" ("LeadID", "CustomerID", "AssignedTo", "Source", "Topic", "Message", "Status", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [newId, newCustomerId, amanUserId, row.Source, row.Topic, row.Message, row.Status, row.Timestamp]
       );
     }
     console.log(`Inserted ${leadsData.length} leads.`);
 
-    // 6. Insert Audits
+    // 7. Insert Audits
     console.log('Inserting audits...');
     for (const row of auditData) {
       const newId = crypto.randomUUID();
@@ -108,9 +138,11 @@ async function seed() {
       if (action === 'Lead Created') action = 'Created';
       if (action === 'Lead Updated' || action === 'Note Added') action = 'Updated';
 
+      const actorId = actorMap.get(row.Actor) || systemUserId; // Fallback to system
+
       await query(
-        `INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "Actor", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)`,
-        [newId, newLeadId, action, row.Actor, row.Comment, row.Timestamp]
+        `INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "ActorID", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)`,
+        [newId, newLeadId, action, actorId, row.Comment, row.Timestamp]
       );
     }
     console.log(`Inserted ${auditData.length} audits.`);

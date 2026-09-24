@@ -3,6 +3,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface Lead {
   LeadID: string;
@@ -52,6 +53,7 @@ export function LeadList({
   };
 
   return (
+    <TooltipProvider>
     <div className="h-full flex flex-col">
       <div className="p-4 border-b space-y-4">
         <div className="flex items-center justify-between">
@@ -118,9 +120,16 @@ export function LeadList({
             </div>
             
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-700 truncate mr-2">
-                {lead.Topic}
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-sm font-medium text-slate-700 truncate mr-2 cursor-default block max-w-[200px]">
+                    {lead.Topic}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{lead.Topic}</p>
+                </TooltipContent>
+              </Tooltip>
               <Badge variant="outline" className={`shrink-0 ${getStatusColor(lead.Status)} border-0`}>
                 {lead.Status}
               </Badge>
@@ -130,9 +139,16 @@ export function LeadList({
               {lead.Source} • {lead.Email}
             </div>
             
-            <p className="text-sm text-slate-600 truncate">
-              {lead.Message}
-            </p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-sm text-slate-600 truncate cursor-default block">
+                  {lead.Message}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs whitespace-pre-wrap break-words">
+                <p>{lead.Message}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         ))}
         
@@ -143,5 +159,6 @@ export function LeadList({
         )}
       </div>
     </div>
+    </TooltipProvider>
   );
 }

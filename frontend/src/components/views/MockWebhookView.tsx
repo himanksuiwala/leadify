@@ -89,6 +89,7 @@ export function MockWebhookView() {
                   <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
                   <Input
                     id="firstName"
+                    maxLength={30}
                     name="firstName"
                     required
                     value={formData.firstName}
@@ -100,6 +101,7 @@ export function MockWebhookView() {
                   <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
                   <Input
                     id="lastName"
+                    maxLength={30}
                     name="lastName"
                     required
                     value={formData.lastName}
@@ -114,6 +116,7 @@ export function MockWebhookView() {
                   <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
                   <Input
                     id="email"
+                    maxLength={100}
                     name="email"
                     type="email"
                     required
@@ -126,6 +129,7 @@ export function MockWebhookView() {
                   <Label htmlFor="phone">Phone (Optional)</Label>
                   <Input
                     id="phone"
+                    maxLength={15}
                     name="phone"
                     type="tel"
                     value={formData.phone}
@@ -149,6 +153,7 @@ export function MockWebhookView() {
                 <Label htmlFor="topic">Topic <span className="text-red-500">*</span></Label>
                 <Input
                   id="topic"
+                    maxLength={50}
                   name="topic"
                   required
                   value={formData.topic}
@@ -162,6 +167,7 @@ export function MockWebhookView() {
                 <Label htmlFor="message">Message <span className="text-red-500">*</span></Label>
                 <Textarea
                   id="message"
+                  maxLength={500}
                   name="message"
                   required
                   rows={4}

@@ -22,6 +22,16 @@ import { leadsRouter } from './routes/leads';
 app.use('/webhook', webhookRouter);
 app.use('/leads', leadsRouter);
 
+app.get('/api/users/me', async (req, res, next) => {
+  try {
+    const result = await query(`SELECT "UserID", "FirstName", "LastName", "Email" FROM "User" WHERE "FirstName" != 'System' LIMIT 1`);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json({ data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/api/health', async (req, res) => {
   try {
     const result = await query('SELECT NOW()');
@@ -39,7 +49,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   if (err instanceof ZodError) {
     return res.status(400).json({ error: 'Validation failed', details: err.issues });
   }
-  console.error(err.stack);
+  console.log('GLOBAL ERROR', err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 

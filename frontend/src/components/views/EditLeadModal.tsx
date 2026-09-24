@@ -85,6 +85,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
               <Label htmlFor="firstName">First Name</Label>
               <Input
                 id="firstName"
+                maxLength={30}
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -95,6 +96,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
               <Label htmlFor="lastName">Last Name</Label>
               <Input
                 id="lastName"
+                maxLength={30}
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -107,6 +109,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
             <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
+              maxLength={15}
               name="phone"
               value={formData.phone}
               onChange={handleChange}
@@ -118,6 +121,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
             <Label htmlFor="source">Source</Label>
             <Input
               id="source"
+              maxLength={30}
               name="source"
               value={formData.source}
               onChange={handleChange}
@@ -129,6 +133,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
             <Label htmlFor="topic">Topic</Label>
             <Input
               id="topic"
+              maxLength={50}
               name="topic"
               value={formData.topic}
               onChange={handleChange}
@@ -140,6 +145,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
             <Label htmlFor="message">Message</Label>
             <Textarea
               id="message"
+              maxLength={500}
               name="message"
               value={formData.message}
               onChange={handleChange}

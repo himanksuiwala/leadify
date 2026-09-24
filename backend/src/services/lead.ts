@@ -6,7 +6,7 @@ export const createLeadWithAudit = async (
   source: string,
   topic: string,
   message: string,
-  actor: string = 'System Webhook'
+  actorId: string
 ) => {
   const client = await pool.connect();
   try {
@@ -22,8 +22,8 @@ export const createLeadWithAudit = async (
 
     const auditId = crypto.randomUUID();
     await client.query(
-      'INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "Actor", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)',
-      [auditId, leadId, 'Created', actor, 'Lead created via webhook', timestamp]
+      'INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "ActorID", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)',
+      [auditId, leadId, 'Created', actorId, 'Lead created via webhook', timestamp]
     );
 
     await client.query('COMMIT');
@@ -101,9 +101,11 @@ export const getLeadDetails = async (leadId: string) => {
 
   const leadRow = leadResult.rows[0];
   const auditResult = await query(`
-    SELECT * FROM "Audit"
-    WHERE "LeadID" = $1
-    ORDER BY "Timestamp" DESC
+    SELECT a.*, u."FirstName" as "UserFirstName", u."LastName" as "UserLastName"
+    FROM "Audit" a
+    LEFT JOIN "User" u ON a."ActorID" = u."UserID"
+    WHERE a."LeadID" = $1
+    ORDER BY a."Timestamp" DESC
   `, [leadId]);
 
   const customer = {
@@ -124,11 +126,17 @@ export const getLeadDetails = async (leadId: string) => {
   return {
     ...leadRow,
     Customer: customer,
-    Audits: auditResult.rows
+    Audits: auditResult.rows.map(row => {
+      const { UserFirstName, UserLastName, ...audit } = row;
+      return {
+        ...audit,
+        User: UserFirstName ? { FirstName: UserFirstName, LastName: UserLastName } : null
+      };
+    })
   };
 };
 
-export const updateLeadStatus = async (leadId: string, status: string, actor: string = 'User') => {
+export const updateLeadStatus = async (leadId: string, status: string, actorId: string) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -146,8 +154,8 @@ export const updateLeadStatus = async (leadId: string, status: string, actor: st
 
     const auditId = crypto.randomUUID();
     await client.query(
-      'INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "Actor", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)',
-      [auditId, leadId, 'Status Changed', actor, `Status changed to ${status}`, timestamp]
+      'INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "ActorID", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)',
+      [auditId, leadId, 'Status Changed', actorId, `Status changed to ${status}`, timestamp]
     );
 
     await client.query('COMMIT');
@@ -163,7 +171,7 @@ export const updateLeadStatus = async (leadId: string, status: string, actor: st
 export const updateLeadDetails = async (
   leadId: string, 
   updates: { firstName?: string, lastName?: string, phone?: string, source?: string, topic?: string, message?: string },
-  actor: string = 'User'
+  actorId: string
 ) => {
   const client = await pool.connect();
   try {
@@ -207,8 +215,8 @@ export const updateLeadDetails = async (
     const timestamp = new Date().toISOString();
     const auditId = crypto.randomUUID();
     await client.query(
-      'INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "Actor", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)',
-      [auditId, leadId, 'Updated', actor, 'Lead details updated', timestamp]
+      'INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "ActorID", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)',
+      [auditId, leadId, 'Updated', actorId, 'Lead details updated', timestamp]
     );
 
     await client.query('COMMIT');

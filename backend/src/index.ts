@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import morgan from 'morgan';
 import { query } from './db';
 import dotenv from 'dotenv';
+import { logger } from './utils/logger';
 
 dotenv.config();
 
@@ -11,6 +13,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Serve static files from the React frontend app
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
@@ -37,7 +40,7 @@ app.get('/api/health', async (req, res) => {
     const result = await query('SELECT NOW()');
     res.json({ status: 'ok', db_time: result.rows[0].now });
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, 'Database connection failed in /api/health');
     res.status(500).json({ status: 'error', message: 'Database connection failed' });
   }
 });
@@ -49,9 +52,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   if (err instanceof ZodError) {
     return res.status(400).json({ error: 'Validation failed', details: err.issues });
   }
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('GLOBAL ERROR', err);
-  }
+  
+  logger.error({ err }, 'Unhandled Global Error');
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
@@ -61,5 +63,5 @@ app.use((req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Backend server is running on port ${port}`);
+  logger.info(`Backend server is running on port ${port}`);
 });

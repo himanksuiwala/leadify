@@ -55,9 +55,9 @@ export const getLeads = async (page: number, limit: number, status?: string, sor
     orderByClause = `
       ORDER BY CASE l."Status"
         WHEN 'New' THEN 1
-        WHEN 'Contacted' THEN 2
-        WHEN 'Qualified' THEN 3
-        WHEN 'Lost' THEN 4
+        WHEN 'Qualified' THEN 2
+        WHEN 'Converted' THEN 3
+        WHEN 'Dead' THEN 4
         ELSE 5
       END ASC, l."Timestamp" DESC
     `;

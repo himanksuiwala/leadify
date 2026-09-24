@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from "date-fns";
+import { TimeDisplay } from "@/components/ui/TimeDisplay";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +26,7 @@ interface LeadListProps {
   onSortChange?: (sort: string) => void;
 }
 
-const statuses = ["All", "New", "Contacted", "Qualified", "Lost"];
+const statuses = ["All", "New", "Qualified", "Converted", "Dead"];
 
 export function LeadList({ 
   leads = [], 
@@ -41,9 +41,9 @@ export function LeadList({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "New": return "bg-blue-100 text-blue-800 hover:bg-blue-200";
-      case "Contacted": return "bg-orange-100 text-orange-800 hover:bg-orange-200";
       case "Qualified": return "bg-green-100 text-green-800 hover:bg-green-200";
-      case "Lost": return "bg-slate-100 text-slate-800 hover:bg-slate-200";
+      case "Converted": return "bg-purple-100 text-purple-800 hover:bg-purple-200";
+      case "Dead": return "bg-red-100 text-red-800 hover:bg-red-200";
       default: return "bg-slate-100 text-slate-800 hover:bg-slate-200";
     }
   };
@@ -105,7 +105,7 @@ export function LeadList({
                 {lead.FirstName} {lead.LastName}
               </h3>
               <span className="text-xs text-slate-500 shrink-0 ml-2">
-                {formatDistanceToNow(new Date(lead.Timestamp), { addSuffix: true })}
+                <TimeDisplay timestamp={lead.Timestamp} />
               </span>
             </div>
             

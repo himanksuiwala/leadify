@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { formatDistanceToNow, parseISO } from "date-fns";
 import { Phone, Mail, MessageSquare, Loader2, ArrowLeft, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TimeDisplay } from "@/components/ui/TimeDisplay";
 
 interface AuditEvent {
   AuditID: string;
@@ -37,6 +37,18 @@ interface DetailedLead {
   Audits: AuditEvent[];
 }
 
+const renderComment = (comment: string) => {
+  if (comment.startsWith("Status changed to ")) {
+    const status = comment.replace("Status changed to ", "");
+    return (
+      <span>
+        Status changed to <strong className="font-semibold text-slate-900">{status}</strong>
+      </span>
+    );
+  }
+  return comment;
+};
+
 export function LeadDetails({ 
   selectedItemId, 
   onBack, 
@@ -63,7 +75,6 @@ export function LeadDetails({
     const controller = new AbortController();
     
     const fetchLead = async () => {
-      // Only show full loading state if we don't have lead data yet
       if (!lead || lead.LeadID !== selectedItemId) {
         setIsLoading(true);
       }
@@ -102,10 +113,7 @@ export function LeadDetails({
       });
       if (!response.ok) throw new Error("Failed to update status");
       
-      // Notify parent to update the list view
       onLeadUpdated?.(lead.LeadID, newStatus);
-      
-      // Trigger a refresh to get updated status and audits
       setRefreshCounter(prev => prev + 1);
     } catch (err: any) {
       setError(err.message);
@@ -161,9 +169,9 @@ export function LeadDetails({
   const allowedTransitions = getAllowedTransitions(lead.Status);
 
   return (
-    <div className="flex-1 relative overflow-y-auto">
-      {/* Sticky Contact Card Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm p-6 flex flex-col gap-4">
+    <div className="flex-1 flex flex-col overflow-hidden bg-white">
+      {/* Contact Card Header */}
+      <div className="shrink-0 z-10 bg-white border-b border-slate-200 shadow-sm p-6 flex flex-col gap-4">
         {isMobileView && onBack && (
           <Button variant="ghost" size="sm" onClick={onBack} className="w-fit -ml-2 text-slate-500 mb-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -232,19 +240,23 @@ export function LeadDetails({
         </div>
       </div>
 
-      {/* Details Content */}
-      <div className="p-6 space-y-8">
-        <div className="space-y-6">
+      {/* Details Content - Grid Layout */}
+      <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[60%_40%] overflow-y-auto lg:overflow-hidden">
+        
+        {/* Left Column: Message & Info */}
+        <div className="flex flex-col relative lg:overflow-y-auto h-full">
           {/* Message Card */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-5">
-            <h3 className="text-sm font-semibold text-slate-900 mb-2">Message</h3>
-            <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-              {lead.Message}
-            </p>
+          <div className="p-6 pb-6 flex-1">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-5">
+              <h3 className="text-sm font-semibold text-slate-900 mb-2">Message</h3>
+              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {lead.Message}
+              </p>
+            </div>
           </div>
 
           {/* Lead Information */}
-          <div>
+          <div className="p-6 mt-auto sticky bottom-0 bg-white border-t border-slate-100 z-10">
             <h3 className="text-sm font-semibold text-slate-900 mb-3">Lead Information</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -254,38 +266,39 @@ export function LeadDetails({
               <div>
                 <span className="text-slate-500 block mb-1">Ingested At</span>
                 <span className="text-slate-900 font-medium">
-                  {formatDistanceToNow(parseISO(lead.Timestamp), { addSuffix: true })}
+                  <TimeDisplay timestamp={lead.Timestamp} />
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Activity Timeline */}
-        {lead.Audits && lead.Audits.length > 0 && (
-          <div className="pt-4 border-t border-slate-100">
-            <h3 className="text-sm font-semibold text-slate-900 mb-6">Activity Timeline</h3>
-            <div className="relative border-l-2 border-slate-200 ml-2 pl-5 space-y-6">
-              {/* Sort audits by newest first if they aren't already, or map directly */}
-              {[...lead.Audits].sort((a, b) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime()).map(audit => (
-                <div key={audit.AuditID} className="relative">
-                  <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-white bg-slate-400" />
-                  <div className="text-sm text-slate-900 font-medium">
-                    {audit.Action} <span className="text-slate-500 font-normal">by {audit.Actor || 'System'}</span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    {formatDistanceToNow(parseISO(audit.Timestamp), { addSuffix: true })}
-                  </div>
-                  {audit.Comment && (
-                    <div className="text-sm text-slate-700 mt-2 bg-slate-50 p-2.5 rounded-md border border-slate-200">
-                      {audit.Comment}
+        {/* Right Column: Activity Timeline */}
+        <div className="p-6 border-t lg:border-t-0 lg:border-l border-slate-200 bg-slate-50/30 lg:overflow-y-auto">
+          {lead.Audits && lead.Audits.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-6">Activity Timeline</h3>
+              <div className="relative border-l-2 border-slate-200 ml-2 pl-5 space-y-6">
+                {[...lead.Audits].sort((a, b) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime()).map(audit => (
+                  <div key={audit.AuditID} className="relative">
+                    <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-white bg-slate-400" />
+                    <div className="text-sm text-slate-900 font-medium">
+                      {audit.Action} <span className="text-slate-500 font-normal">by {audit.Actor || 'System'}</span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    <div className="text-xs text-slate-500 mt-1">
+                      <TimeDisplay timestamp={audit.Timestamp} />
+                    </div>
+                    {audit.Comment && (
+                      <div className="text-sm text-slate-700 mt-2 bg-slate-50 p-2.5 rounded-md border border-slate-200">
+                        {renderComment(audit.Comment)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

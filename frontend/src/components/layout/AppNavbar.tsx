@@ -1,13 +1,26 @@
-
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export function AppNavbar() {
   return (
-    <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-white px-6 w-full shrink-0">
-      <SidebarTrigger />
-      <div className="flex flex-1 items-center gap-4">
-        <h1 className="font-semibold text-lg">Navbar/Header</h1>
+    <header className="flex h-14 lg:h-[60px] items-center justify-between gap-4 border-b bg-white px-6 w-full shrink-0">
+      {/* Left Spacer */}
+      <div className="flex-1" />
+      
+      {/* Centered Search Bar */}
+      <div className="flex-1 flex justify-center min-w-[300px] max-w-md">
+        <div className="relative w-full">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+          <Input 
+            type="search"
+            placeholder="Search leads, contacts, or analytics..."
+            className="w-full pl-9 bg-slate-50 border-slate-200 focus-visible:ring-slate-300"
+          />
+        </div>
       </div>
+      
+      {/* Right Spacer */}
+      <div className="flex-1" />
     </header>
   );
 }

@@ -114,6 +114,9 @@ export function MasterDetailView() {
             selectedItemId={selectedItemId} 
             onBack={() => setSelectedItemId(null)}
             isMobileView={isMobile}
+            onLeadUpdated={(id, status) => {
+              setLeads(prev => prev.map(l => l.LeadID === id ? { ...l, Status: status } : l));
+            }}
           />
         </div>
       )}

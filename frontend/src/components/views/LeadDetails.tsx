@@ -1,8 +1,23 @@
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import { Phone, Mail, MessageSquare, Loader2, ArrowLeft } from "lucide-react";
+import { Phone, Mail, MessageSquare, Loader2, ArrowLeft, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+interface AuditEvent {
+  AuditID: string;
+  LeadID: string;
+  Action: string;
+  Actor: string;
+  Comment: string;
+  Timestamp: string;
+}
 
 interface DetailedLead {
   LeadID: string;
@@ -19,20 +34,25 @@ interface DetailedLead {
     Email: string;
     Phone: string | null;
   };
+  Audits: AuditEvent[];
 }
 
 export function LeadDetails({ 
   selectedItemId, 
   onBack, 
-  isMobileView 
+  isMobileView,
+  onLeadUpdated
 }: { 
   selectedItemId: string | null;
   onBack?: () => void;
   isMobileView?: boolean;
+  onLeadUpdated?: (id: string, newStatus: string) => void;
 }) {
   const [lead, setLead] = useState<DetailedLead | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
     if (!selectedItemId) {
@@ -43,7 +63,10 @@ export function LeadDetails({
     const controller = new AbortController();
     
     const fetchLead = async () => {
-      setIsLoading(true);
+      // Only show full loading state if we don't have lead data yet
+      if (!lead || lead.LeadID !== selectedItemId) {
+        setIsLoading(true);
+      }
       setError(null);
       try {
         const response = await fetch(`http://localhost:3000/leads/${selectedItemId}`, {
@@ -64,7 +87,32 @@ export function LeadDetails({
     fetchLead();
 
     return () => controller.abort();
-  }, [selectedItemId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItemId, refreshCounter]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!lead) return;
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:3000/leads/${lead.LeadID}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!response.ok) throw new Error("Failed to update status");
+      
+      // Notify parent to update the list view
+      onLeadUpdated?.(lead.LeadID, newStatus);
+      
+      // Trigger a refresh to get updated status and audits
+      setRefreshCounter(prev => prev + 1);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   if (!selectedItemId) {
     return (
@@ -95,12 +143,22 @@ export function LeadDetails({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "New": return "bg-blue-100 text-blue-800 hover:bg-blue-100";
-      case "Contacted": return "bg-orange-100 text-orange-800 hover:bg-orange-100";
       case "Qualified": return "bg-green-100 text-green-800 hover:bg-green-100";
-      case "Lost": return "bg-red-100 text-red-800 hover:bg-red-100";
+      case "Converted": return "bg-purple-100 text-purple-800 hover:bg-purple-100";
+      case "Dead": return "bg-red-100 text-red-800 hover:bg-red-100";
       default: return "bg-slate-100 text-slate-800 hover:bg-slate-100";
     }
   };
+
+  const getAllowedTransitions = (status: string) => {
+    switch (status) {
+      case "New": return ["Qualified", "Dead"];
+      case "Qualified": return ["Converted", "Dead"];
+      default: return [];
+    }
+  };
+
+  const allowedTransitions = getAllowedTransitions(lead.Status);
 
   return (
     <div className="flex-1 relative overflow-y-auto">
@@ -118,7 +176,26 @@ export function LeadDetails({
               <h1 className="text-2xl font-bold text-slate-900">
                 {lead.Customer.FirstName} {lead.Customer.LastName}
               </h1>
-              <Badge className={getStatusColor(lead.Status)}>{lead.Status}</Badge>
+              {allowedTransitions.length > 0 ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild disabled={isUpdating}>
+                    <Badge className={`cursor-pointer ${getStatusColor(lead.Status)}`}>
+                      {isUpdating && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                      {lead.Status}
+                      <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+                    </Badge>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {allowedTransitions.map(status => (
+                      <DropdownMenuItem key={status} onClick={() => handleStatusChange(status)}>
+                        Mark as {status}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Badge className={getStatusColor(lead.Status)}>{lead.Status}</Badge>
+              )}
             </div>
             <p className="text-lg font-medium text-slate-700">{lead.Topic}</p>
           </div>
@@ -156,31 +233,59 @@ export function LeadDetails({
       </div>
 
       {/* Details Content */}
-      <div className="p-6 space-y-6">
-        {/* Message Card */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-5">
-          <h3 className="text-sm font-semibold text-slate-900 mb-2">Message</h3>
-          <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
-            {lead.Message}
-          </p>
-        </div>
+      <div className="p-6 space-y-8">
+        <div className="space-y-6">
+          {/* Message Card */}
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-5">
+            <h3 className="text-sm font-semibold text-slate-900 mb-2">Message</h3>
+            <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+              {lead.Message}
+            </p>
+          </div>
 
-        {/* Lead Information */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Lead Information</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-slate-500 block mb-1">Source</span>
-              <span className="text-slate-900 font-medium">{lead.Source}</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block mb-1">Ingested At</span>
-              <span className="text-slate-900 font-medium">
-                {formatDistanceToNow(parseISO(lead.Timestamp), { addSuffix: true })}
-              </span>
+          {/* Lead Information */}
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">Lead Information</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-slate-500 block mb-1">Source</span>
+                <span className="text-slate-900 font-medium">{lead.Source}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block mb-1">Ingested At</span>
+                <span className="text-slate-900 font-medium">
+                  {formatDistanceToNow(parseISO(lead.Timestamp), { addSuffix: true })}
+                </span>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Activity Timeline */}
+        {lead.Audits && lead.Audits.length > 0 && (
+          <div className="pt-4 border-t border-slate-100">
+            <h3 className="text-sm font-semibold text-slate-900 mb-6">Activity Timeline</h3>
+            <div className="relative border-l-2 border-slate-200 ml-2 pl-5 space-y-6">
+              {/* Sort audits by newest first if they aren't already, or map directly */}
+              {[...lead.Audits].sort((a, b) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime()).map(audit => (
+                <div key={audit.AuditID} className="relative">
+                  <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-white bg-slate-400" />
+                  <div className="text-sm text-slate-900 font-medium">
+                    {audit.Action} <span className="text-slate-500 font-normal">by {audit.Actor || 'System'}</span>
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    {formatDistanceToNow(parseISO(audit.Timestamp), { addSuffix: true })}
+                  </div>
+                  {audit.Comment && (
+                    <div className="text-sm text-slate-700 mt-2 bg-slate-50 p-2.5 rounded-md border border-slate-200">
+                      {audit.Comment}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

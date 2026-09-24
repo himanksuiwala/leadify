@@ -16,10 +16,15 @@ async function seed() {
       DROP TABLE IF EXISTS "Audit" CASCADE;
       DROP TABLE IF EXISTS "Lead" CASCADE;
       DROP TABLE IF EXISTS "Customer" CASCADE;
+      DROP TYPE IF EXISTS lead_status CASCADE;
+      DROP TYPE IF EXISTS audit_action CASCADE;
     `);
 
-    console.log('Creating tables...');
+    console.log('Creating ENUMs and tables...');
     await query(`
+      CREATE TYPE lead_status AS ENUM ('New', 'Qualified', 'Converted', 'Dead');
+      CREATE TYPE audit_action AS ENUM ('Created', 'Updated', 'Status Changed');
+
       CREATE TABLE "Customer" (
         "CustomerID" UUID PRIMARY KEY,
         "FirstName" TEXT NOT NULL,
@@ -34,14 +39,14 @@ async function seed() {
         "Source" TEXT,
         "Topic" TEXT,
         "Message" TEXT,
-        "Status" TEXT,
+        "Status" lead_status DEFAULT 'New',
         "Timestamp" TIMESTAMP
       );
 
       CREATE TABLE "Audit" (
         "AuditID" UUID PRIMARY KEY,
         "LeadID" UUID NOT NULL REFERENCES "Lead"("LeadID") ON DELETE CASCADE,
-        "Action" TEXT,
+        "Action" audit_action,
         "Actor" TEXT,
         "Comment" TEXT,
         "Timestamp" TIMESTAMP
@@ -99,9 +104,13 @@ async function seed() {
 
       if (!newLeadId) throw new Error(`Lead ID ${row.LeadID} not found in map.`);
 
+      let action = row.Action;
+      if (action === 'Lead Created') action = 'Created';
+      if (action === 'Lead Updated' || action === 'Note Added') action = 'Updated';
+
       await query(
         `INSERT INTO "Audit" ("AuditID", "LeadID", "Action", "Actor", "Comment", "Timestamp") VALUES ($1, $2, $3, $4, $5, $6)`,
-        [newId, newLeadId, row.Action, row.Actor, row.Comment, row.Timestamp]
+        [newId, newLeadId, action, row.Actor, row.Comment, row.Timestamp]
       );
     }
     console.log(`Inserted ${auditData.length} audits.`);

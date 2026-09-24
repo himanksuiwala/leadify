@@ -29,20 +29,32 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
     topic: "",
     message: "",
   });
+  const [initialData, setInitialData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    source: "",
+    topic: "",
+    message: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen && lead) {
-      setFormData({
+      const data = {
         firstName: lead.Customer?.FirstName || "",
         lastName: lead.Customer?.LastName || "",
         phone: lead.Customer?.Phone || "",
         source: lead.Source || "",
         topic: lead.Topic || "",
         message: lead.Message || "",
-      });
+      };
+      setFormData(data);
+      setInitialData(data);
     }
   }, [isOpen, lead]);
+
+  const isUnchanged = JSON.stringify(formData) === JSON.stringify(initialData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -159,7 +171,7 @@ export function EditLeadModal({ isOpen, onOpenChange, lead, onSuccess }: EditLea
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSubmitting}>
+          <Button onClick={handleSave} disabled={isSubmitting || isUnchanged}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
           </Button>

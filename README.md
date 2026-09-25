@@ -1,4 +1,4 @@
-# Leadify Monolithic Fullstack App
+# Leadify
 
 This project contains a React+TypeScript frontend, an Express.js backend, and a PostgreSQL database, all configured to run inside a **single Docker container**.
 

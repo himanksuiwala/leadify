@@ -48,4 +48,4 @@ vite.config.ts.timestamp-*
 prompts.md
 .specify
 .agents
-specs
+# specs
